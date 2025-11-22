@@ -31,22 +31,37 @@ export default function App() {
 
     const { data, isLoading, isError } = useQuery<NotesData, Error>({
     queryKey: ["notes", debouncedSearch, currentPage],
-    queryFn: () => fetchNotes({ page: currentPage, search: debouncedSearch }),
+    queryFn: () =>
+      fetchNotes({ page: currentPage, search: debouncedSearch }),
     placeholderData: () =>
-      queryClient.getQueryData<NotesData>(["notes", debouncedSearch, currentPage - 1]),
+      queryClient.getQueryData<NotesData>([
+        "notes",
+        debouncedSearch,
+        currentPage - 1,
+      ]),
   });
 
     const deleteMutation = useMutation<void, Error, string, DeleteContext>({
     mutationFn: (id: string) => deleteNote(id),
     onMutate: async (id: string) => {
-      await queryClient.cancelQueries({ queryKey: ["notes", debouncedSearch, currentPage] });
+      await queryClient.cancelQueries({
+        queryKey: ["notes", debouncedSearch, currentPage],
+      });
 
-      const previousData = queryClient.getQueryData<NotesData>(["notes", debouncedSearch, currentPage]);
+      const previousData = queryClient.getQueryData<NotesData>([
+        "notes",
+        debouncedSearch,
+        currentPage,
+      ]);
 
       if (previousData) {
-        queryClient.setQueryData<NotesData>(["notes", debouncedSearch, currentPage], {
+        queryClient.setQueryData<NotesData>([
+          "notes",
+          debouncedSearch,
+          currentPage,
+        ], {
           ...previousData,
-          data: previousData.data.filter(note => note.id !== id),
+          data: previousData.data.filter((note) => note.id !== id),
         });
       }
 
@@ -54,11 +69,17 @@ export default function App() {
     },
     onError: (_err, _id, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData<NotesData>(["notes", debouncedSearch, currentPage], context.previousData);
+        queryClient.setQueryData<NotesData>([
+          "notes",
+          debouncedSearch,
+          currentPage,
+        ], context.previousData);
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes", debouncedSearch, currentPage] });
+      queryClient.invalidateQueries({
+        queryKey: ["notes", debouncedSearch, currentPage],
+      });
     },
   });
 
