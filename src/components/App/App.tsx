@@ -29,20 +29,14 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // ===============================
-  // useQuery для нотаток
-  // ===============================
-  const { data, isLoading, isError } = useQuery<NotesData, Error>({
+    const { data, isLoading, isError } = useQuery<NotesData, Error>({
     queryKey: ["notes", debouncedSearch, currentPage],
     queryFn: () => fetchNotes({ page: currentPage, search: debouncedSearch }),
     placeholderData: () =>
       queryClient.getQueryData<NotesData>(["notes", debouncedSearch, currentPage - 1]),
   });
 
-  // ===============================
-  // useMutation для видалення нотатки
-  // ===============================
-  const deleteMutation = useMutation<void, Error, string, DeleteContext>({
+    const deleteMutation = useMutation<void, Error, string, DeleteContext>({
     mutationFn: (id: string) => deleteNote(id),
     onMutate: async (id: string) => {
       await queryClient.cancelQueries({ queryKey: ["notes", debouncedSearch, currentPage] });
