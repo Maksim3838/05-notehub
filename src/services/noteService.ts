@@ -13,23 +13,23 @@ const api = axios.create({
   },
 });
 
+
 export interface FetchNotesParams {
   page?: number;
   search?: string;
 }
 
+
 export interface FetchNotesResponse {
-  results: Note[];
+  notes: Note[];
   totalPages: number;
-  currentPage: number;
 }
+
 
 export interface CreateNoteDto {
+  title: string;
   content: string;
-}
-
-export interface DeleteNoteResponse {
-  deleted: Note;
+  tag: string;
 }
 
 export async function fetchNotes(
@@ -42,17 +42,18 @@ export async function fetchNotes(
     },
   });
 
-  return response.data;
+  return response.data; 
 }
+
 
 export async function createNote(
   dto: CreateNoteDto
 ): Promise<Note> {
   const response: AxiosResponse<Note> = await api.post("/", dto);
-  return response.data;
+  return response.data; 
 }
 
-export async function deleteNote(id: number): Promise<DeleteNoteResponse> {
-  const response: AxiosResponse<DeleteNoteResponse> = await api.delete(`/${id}`);
-  return response.data;
+export async function deleteNote(id: string): Promise<Note> {
+  const response: AxiosResponse<Note> = await api.delete(`/${id}`);
+  return response.data; 
 }
