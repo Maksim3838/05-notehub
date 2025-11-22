@@ -13,7 +13,7 @@ import Pagination from "../Pagination/Pagination";
 import css from "./App.module.css";
 
 interface NotesData {
-  notes: Note[];
+  data: Note[];
   totalPages: number;
 }
 
@@ -29,14 +29,20 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // ===============================
+  // useQuery для нотаток
+  // ===============================
   const { data, isLoading, isError } = useQuery<NotesData, Error>({
     queryKey: ["notes", debouncedSearch, currentPage],
-    queryFn: () => fetchNotes({ search: debouncedSearch, page: currentPage }),
+    queryFn: () => fetchNotes({ page: currentPage, search: debouncedSearch }),
     placeholderData: () =>
       queryClient.getQueryData<NotesData>(["notes", debouncedSearch, currentPage - 1]),
   });
 
-  const deleteMutation = useMutation<Note, Error, string, DeleteContext>({
+  // ===============================
+  // useMutation для видалення нотатки
+  // ===============================
+  const deleteMutation = useMutation<void, Error, string, DeleteContext>({
     mutationFn: (id: string) => deleteNote(id),
     onMutate: async (id: string) => {
       await queryClient.cancelQueries({ queryKey: ["notes", debouncedSearch, currentPage] });
@@ -46,11 +52,11 @@ export default function App() {
       if (previousData) {
         queryClient.setQueryData<NotesData>(["notes", debouncedSearch, currentPage], {
           ...previousData,
-          notes: previousData.notes.filter(note => note.id !== id),
+          data: previousData.data.filter(note => note.id !== id),
         });
       }
 
-      return { previousData }; 
+      return { previousData };
     },
     onError: (_err, _id, context) => {
       if (context?.previousData) {
@@ -64,7 +70,7 @@ export default function App() {
 
   const handleDelete = (id: string) => deleteMutation.mutate(id);
 
-  const notes = data?.notes ?? [];
+  const notes = data?.data ?? [];
   const totalPages = data?.totalPages ?? 0;
 
   if (isLoading) return <p>Loading...</p>;
@@ -77,7 +83,7 @@ export default function App() {
           value={searchValue}
           onChange={(value) => {
             setSearchValue(value);
-            setCurrentPage(1); 
+            setCurrentPage(1);
           }}
         />
         <button className={css.button} onClick={() => setIsModalOpen(true)}>

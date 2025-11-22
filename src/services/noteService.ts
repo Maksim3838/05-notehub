@@ -1,59 +1,37 @@
-import axios from "axios";
-import type { AxiosResponse } from "axios";
 import type { Note } from "../types/note";
 
-const API_URL = "https://notehub-lite.onrender.com/api/notes";
-
-const TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
-
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    Authorization: `Bearer ${TOKEN}`,
-  },
-});
-
-
-export interface FetchNotesParams {
-  page?: number;
+interface FetchNotesParams {
+  page: number;
+  perPage?: number;
   search?: string;
 }
 
-
-export interface FetchNotesResponse {
-  notes: Note[];
+interface NotesApiResponse {
+  data: Note[];
   totalPages: number;
 }
 
+// Отримання нотаток
+export async function fetchNotes({ page, perPage = 12, search = "" }: FetchNotesParams): Promise<NotesApiResponse> {
+  const query = new URLSearchParams({ page: String(page), perPage: String(perPage) });
+  if (search) query.append("search", search);
 
-export interface CreateNoteDto {
-  title: string;
-  content: string;
-  tag: string;
+  const res = await fetch(`https://notehub-public.goit.study/api/notes?${query.toString()}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch notes: ${res.status}`);
+  }
+  const json = await res.json();
+  
+  return {
+    data: json.data,
+    totalPages: json.totalPages || 1,
+  };
 }
 
-export async function fetchNotes(
-  params: FetchNotesParams = {}
-): Promise<FetchNotesResponse> {
-  const response: AxiosResponse<FetchNotesResponse> = await api.get("/", {
-    params: {
-      page: params.page ?? 1,
-      search: params.search ?? "",
-    },
-  });
-
-  return response.data; 
-}
-
-
-export async function createNote(
-  dto: CreateNoteDto
-): Promise<Note> {
-  const response: AxiosResponse<Note> = await api.post("/", dto);
-  return response.data; 
-}
-
-export async function deleteNote(id: string): Promise<Note> {
-  const response: AxiosResponse<Note> = await api.delete(`/${id}`);
-  return response.data; 
+// Видалення нотатки (якщо бекенд дозволяє)
+export async function deleteNote(id: string): Promise<void> {
+  const res = await fetch(`https://notehub-public.goit.study/api/notes/${id}`, { method: "DELETE" });
+  if (!res.ok) {
+    throw new Error(`Failed to delete note: ${res.status}`);
+  }
 }
