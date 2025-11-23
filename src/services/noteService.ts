@@ -1,49 +1,40 @@
+import axios from "axios";
 import type { Note } from "../types/note";
 
-interface FetchNotesParams {
-  page: number;
-  perPage?: number;
-  search?: string;
-}
+const api = axios.create({
+  baseURL: "https://notehub-public.goit.study/api",
+  headers: {
+    Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
+  },
+});
 
-interface NotesApiResponse {
+
+export interface NotesResponse {
   data: Note[];
   totalPages: number;
 }
 
-const API_TOKEN = import.meta.env.VITE_NOTES_API_TOKEN;
 
-export async function fetchNotes({ page, perPage = 12, search = "" }: FetchNotesParams): Promise<NotesApiResponse> {
-  const query = new URLSearchParams({ page: String(page), perPage: String(perPage) });
-  if (search) query.append("search", search);
+export async function fetchNotes(params: { page: number; search: string }) {
+  const { page, search } = params;
 
-  const res = await fetch(`https://notehub-public.goit.study/api/notes?${query.toString()}`, {
-    headers: {
-      "Authorization": `Bearer ${API_TOKEN}`,
+  const res = await api.get<NotesResponse>("/notes", {
+    params: {
+      page,
+      perPage: 12,
+      search,
     },
   });
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch notes: ${res.status}`);
-  }
-
-  const json = await res.json();
-
-  return {
-    data: json.data,
-    totalPages: json.totalPages || 1,
-  };
+  return res.data;
 }
 
 export async function deleteNote(id: string): Promise<void> {
-  const res = await fetch(`https://notehub-public.goit.study/api/notes/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Authorization": `Bearer ${API_TOKEN}`,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Failed to delete note: ${res.status}`);
-  }
+  await api.delete<void>(`/notes/${id}`);
 }
+
+export async function createNote(payload: Omit<Note, "id" | "createdAt" | "updatedAt">): Promise<Note> {
+  const res = await api.post<Note>("/notes", payload);
+  return res.data;
+}
+
