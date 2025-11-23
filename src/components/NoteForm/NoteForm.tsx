@@ -6,6 +6,7 @@ interface NoteFormProps {
   onSubmit: (note: { title: string; content: string; tag: string }) => void;
 }
 
+
 const NoteSchema = Yup.object().shape({
   title: Yup.string().trim().required("Title is required"),
   content: Yup.string()
