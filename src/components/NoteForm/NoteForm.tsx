@@ -1,29 +1,54 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createNote } from "../../services/noteService";
+import type { Note } from "../../types/note";
 
 interface NoteFormProps {
   onClose: () => void;
-  onSubmit: (note: { title: string; content: string; tag: string }) => void;
 }
 
-
+// Валідація
 const NoteSchema = Yup.object().shape({
   title: Yup.string().trim().required("Title is required"),
   content: Yup.string()
     .trim()
     .min(10, "Content must be at least 10 characters")
     .required("Content is required"),
-  tag: Yup.string().required("Tag is required"),
+  tag: Yup.string()
+    .oneOf(["work", "personal", "ideas", "other"], "Invalid tag")
+    .required("Tag is required"),
 });
 
-export default function NoteForm({ onClose, onSubmit }: NoteFormProps) {
+// Тип для Formik
+type NoteFormValues = {
+  title: string;
+  content: string;
+  tag: "" | "work" | "personal" | "ideas" | "other";
+};
+
+export default function NoteForm({ onClose }: NoteFormProps) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (note: Omit<Note, "id" | "createdAt" | "updatedAt">) =>
+      createNote(note),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      onClose();
+    },
+  });
+
   return (
     <Formik
-      initialValues={{ title: "", content: "", tag: "" }}
+      initialValues={{ title: "", content: "", tag: "" } as NoteFormValues}
       validationSchema={NoteSchema}
       onSubmit={(values) => {
-        onSubmit(values);
-        onClose();
+        mutation.mutate({
+          title: values.title,
+          content: values.content,
+          tag: values.tag as "work" | "personal" | "ideas" | "other",
+        });
       }}
     >
       {({ isSubmitting }) => (
@@ -40,12 +65,7 @@ export default function NoteForm({ onClose, onSubmit }: NoteFormProps) {
           {/* CONTENT */}
           <label>
             Content:
-            <Field
-              as="textarea"
-              name="content"
-              placeholder="Note content..."
-              rows={4}
-            />
+            <Field as="textarea" name="content" placeholder="Note content..." rows={4} />
           </label>
           <div style={{ color: "red", fontSize: "0.9rem" }}>
             <ErrorMessage name="content" />
@@ -57,19 +77,18 @@ export default function NoteForm({ onClose, onSubmit }: NoteFormProps) {
             <Field as="select" name="tag">
               <option value="">Select tag</option>
               <option value="work">Work</option>
-              <option value="study">Study</option>
               <option value="personal">Personal</option>
-              <option value="idea">Idea</option>
+              <option value="ideas">Ideas</option>
+              <option value="other">Other</option>
             </Field>
           </label>
           <div style={{ color: "red", fontSize: "0.9rem" }}>
             <ErrorMessage name="tag" />
           </div>
 
-          <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save"}
+          <button type="submit" disabled={mutation.isPending || isSubmitting}>
+            {mutation.isPending ? "Saving..." : "Save"}
           </button>
-
           <button type="button" onClick={onClose}>
             Cancel
           </button>
@@ -78,5 +97,3 @@ export default function NoteForm({ onClose, onSubmit }: NoteFormProps) {
     </Formik>
   );
 }
-
-
