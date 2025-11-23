@@ -4,8 +4,8 @@ import { deleteNote } from "../../services/noteService";
 
 interface NoteListProps {
   notes: Note[];
+  onDelete: (id: string) => void;
 }
-
 export default function NoteList({ notes }: NoteListProps) {
   const queryClient = useQueryClient();
 
