@@ -8,7 +8,6 @@ interface NoteFormProps {
   onClose: () => void;
 }
 
-// Валідація
 const NoteSchema = Yup.object().shape({
   title: Yup.string().trim().required("Title is required"),
   content: Yup.string()
@@ -20,7 +19,6 @@ const NoteSchema = Yup.object().shape({
     .required("Tag is required"),
 });
 
-// Тип для Formik
 type NoteFormValues = {
   title: string;
   content: string;
@@ -53,7 +51,6 @@ export default function NoteForm({ onClose }: NoteFormProps) {
     >
       {({ isSubmitting }) => (
         <Form>
-          {/* TITLE */}
           <label>
             Title:
             <Field type="text" name="title" placeholder="Note title" />
@@ -62,7 +59,6 @@ export default function NoteForm({ onClose }: NoteFormProps) {
             <ErrorMessage name="title" />
           </div>
 
-          {/* CONTENT */}
           <label>
             Content:
             <Field as="textarea" name="content" placeholder="Note content..." rows={4} />
@@ -71,7 +67,6 @@ export default function NoteForm({ onClose }: NoteFormProps) {
             <ErrorMessage name="content" />
           </div>
 
-          {/* TAG */}
           <label>
             Tag:
             <Field as="select" name="tag">
