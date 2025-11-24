@@ -8,21 +8,24 @@ interface NoteFormProps {
   onClose: () => void;
 }
 
+const allowedTags = ["Todo", "Work", "Personal", "Meeting", "Shopping"] as const;
+type AllowedTag = (typeof allowedTags)[number];
+
 const NoteSchema = Yup.object().shape({
   title: Yup.string().trim().required("Title is required"),
   content: Yup.string()
     .trim()
     .min(10, "Content must be at least 10 characters")
     .required("Content is required"),
-  tag: Yup.string()
-    .oneOf(["work", "personal", "ideas", "other"], "Invalid tag")
+  tag: Yup.mixed<AllowedTag>()
+    .oneOf(allowedTags, "Invalid tag")
     .required("Tag is required"),
 });
 
 type NoteFormValues = {
   title: string;
   content: string;
-  tag: "" | "work" | "personal" | "ideas" | "other";
+  tag: "" | AllowedTag;
 };
 
 export default function NoteForm({ onClose }: NoteFormProps) {
@@ -38,14 +41,14 @@ export default function NoteForm({ onClose }: NoteFormProps) {
   });
 
   return (
-    <Formik
-      initialValues={{ title: "", content: "", tag: "" } as NoteFormValues}
+    <Formik<NoteFormValues>
+      initialValues={{ title: "", content: "", tag: "" }}
       validationSchema={NoteSchema}
       onSubmit={(values) => {
         mutation.mutate({
           title: values.title,
           content: values.content,
-          tag: values.tag as "work" | "personal" | "ideas" | "other",
+          tag: values.tag!, 
         });
       }}
     >
@@ -71,10 +74,11 @@ export default function NoteForm({ onClose }: NoteFormProps) {
             Tag:
             <Field as="select" name="tag">
               <option value="">Select tag</option>
-              <option value="work">Work</option>
-              <option value="personal">Personal</option>
-              <option value="ideas">Ideas</option>
-              <option value="other">Other</option>
+              <option value="Todo">Todo</option>
+              <option value="Work">Work</option>
+              <option value="Personal">Personal</option>
+              <option value="Meeting">Meeting</option>
+              <option value="Shopping">Shopping</option>
             </Field>
           </label>
           <div style={{ color: "red", fontSize: "0.9rem" }}>
