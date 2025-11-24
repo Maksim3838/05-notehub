@@ -4,36 +4,46 @@ import { deleteNote } from "../../services/noteService";
 
 interface NoteListProps {
   notes: Note[];
-  onDelete: (id: string) => void;
 }
+
 export default function NoteList({ notes }: NoteListProps) {
   const queryClient = useQueryClient();
 
-  const { mutate, status } = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteNote(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    onSuccess: (deletedNote) => {
+  
+      queryClient.setQueryData<{ notes: Note[]; totalPages: number }>(
+        ["notes"],
+        (oldData) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            notes: oldData.notes.filter((note) => note.id !== deletedNote.id),
+          };
+        }
+      );
     },
   });
 
-  const handleDelete = (id: string) => mutate(id);
-
-  if (notes.length === 0) return <p>No notes available.</p>;
-
   return (
-    <ul>
+    <div className="note-list">
+      {notes.length === 0 && <p>No notes found.</p>}
       {notes.map((note) => (
-        <li key={note.id} style={{ marginBottom: "1rem" }}>
+        <div key={note.id} className="note-card">
           <h3>{note.title}</h3>
           <p>{note.content}</p>
-          <p>
-            <strong>Tag:</strong> {note.tag}
-          </p>
-          <button onClick={() => handleDelete(note.id)} disabled={status === "pending"}>
-            {status === "pending" ? "Deleting..." : "Delete"}
-          </button>
-        </li>
+          <small>{note.tag}</small>
+          <div style={{ marginTop: "0.5rem" }}>
+            <button
+              onClick={() => deleteMutation.mutate(note.id)}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }

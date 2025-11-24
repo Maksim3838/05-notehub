@@ -1,40 +1,71 @@
-import axios from "axios";
 import type { Note } from "../types/note";
 
-const api = axios.create({
-  baseURL: "https://notehub-public.goit.study/api",
-  headers: {
-    Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
-  },
-});
-
+export type AllowedTag = "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
 
 export interface NotesResponse {
-  data: Note[];
+  notes: Note[];
   totalPages: number;
 }
 
+export const fetchNotes = async (
+  page = 1,
+  search = ""
+): Promise<NotesResponse> => {
+  const res = await fetch(
+    `/api/notes/?page=${page}&search=${encodeURIComponent(search)}`
+  );
 
-export async function fetchNotes(params: { page: number; search: string }) {
-  const { page, search } = params;
+  if (!res.ok) {
+    throw new Error("Failed to fetch notes");
+  }
 
-  const res = await api.get<NotesResponse>("/notes", {
-    params: {
-      page,
-      perPage: 12,
-      search,
-    },
+  const data: NotesResponse = await res.json();
+  return data;
+};
+
+export const createNote = async (
+  note: Omit<Note, "id" | "createdAt" | "updatedAt">
+): Promise<Note> => {
+  const res = await fetch("/api/notes/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(note),
   });
 
-  return res.data;
-}
+  if (!res.ok) {
+    throw new Error("Failed to create note");
+  }
 
-export async function deleteNote(id: string): Promise<void> {
-  await api.delete<void>(`/notes/${id}`);
-}
+  const createdNote: Note = await res.json();
+  return createdNote;
+};
 
-export async function createNote(payload: Omit<Note, "id" | "createdAt" | "updatedAt">): Promise<Note> {
-  const res = await api.post<Note>("/notes", payload);
-  return res.data;
-}
+export const updateNote = async (
+  note: Note
+): Promise<Note> => {
+  const res = await fetch(`/api/notes/${note.id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(note),
+  });
 
+  if (!res.ok) {
+    throw new Error("Failed to update note");
+  }
+
+  const updatedNote: Note = await res.json();
+  return updatedNote;
+};
+
+export const deleteNote = async (
+  id: string
+): Promise<Note> => {
+  const res = await fetch(`/api/notes/${id}`, { method: "DELETE" });
+
+  if (!res.ok) {
+    throw new Error("Failed to delete note");
+  }
+
+  const deletedNote: Note = await res.json();
+  return deletedNote;
+};
