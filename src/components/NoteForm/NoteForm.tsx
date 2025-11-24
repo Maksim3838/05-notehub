@@ -8,9 +8,11 @@ interface NoteFormProps {
   onClose: () => void;
 }
 
+// Єдиний набір дозволених тегів
 const allowedTags = ["Todo", "Work", "Personal", "Meeting", "Shopping"] as const;
 type AllowedTag = (typeof allowedTags)[number];
 
+// Yup-схема
 const NoteSchema = Yup.object().shape({
   title: Yup.string().trim().required("Title is required"),
   content: Yup.string()
@@ -22,10 +24,11 @@ const NoteSchema = Yup.object().shape({
     .required("Tag is required"),
 });
 
+// Тип значень форми
 type NoteFormValues = {
   title: string;
   content: string;
-  tag: "" | AllowedTag;
+  tag: "" | AllowedTag; // "" дозволяємо тільки для placeholder
 };
 
 export default function NoteForm({ onClose }: NoteFormProps) {
@@ -45,10 +48,11 @@ export default function NoteForm({ onClose }: NoteFormProps) {
       initialValues={{ title: "", content: "", tag: "" }}
       validationSchema={NoteSchema}
       onSubmit={(values) => {
+        // Значення "" ніколи не дійде сюди через Yup
         mutation.mutate({
           title: values.title,
           content: values.content,
-          tag: values.tag!, 
+          tag: values.tag as AllowedTag, // безпечний каст
         });
       }}
     >
@@ -74,11 +78,11 @@ export default function NoteForm({ onClose }: NoteFormProps) {
             Tag:
             <Field as="select" name="tag">
               <option value="">Select tag</option>
-              <option value="Todo">Todo</option>
-              <option value="Work">Work</option>
-              <option value="Personal">Personal</option>
-              <option value="Meeting">Meeting</option>
-              <option value="Shopping">Shopping</option>
+              {allowedTags.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
             </Field>
           </label>
           <div style={{ color: "red", fontSize: "0.9rem" }}>
