@@ -63,3 +63,4 @@ export default function Modal({ onClose, children }: ModalProps) {
 
   return createPortal(modalContent, modalRoot);
 }
+

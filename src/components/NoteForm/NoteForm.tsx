@@ -6,29 +6,29 @@ import type { Note } from "../../types/note";
 
 interface NoteFormProps {
   onClose: () => void;
+  onSubmit: (note: { title: string; content?: string; tag?: string }) => void;
 }
 
-// Єдиний набір дозволених тегів
+
 const allowedTags = ["Todo", "Work", "Personal", "Meeting", "Shopping"] as const;
 type AllowedTag = (typeof allowedTags)[number];
 
-// Yup-схема
 const NoteSchema = Yup.object().shape({
   title: Yup.string().trim().required("Title is required"),
   content: Yup.string()
     .trim()
-    .min(10, "Content must be at least 10 characters")
-    .required("Content is required"),
+    .max(500, "Content must be at most 500 characters")
+    .optional(),
   tag: Yup.mixed<AllowedTag>()
     .oneOf(allowedTags, "Invalid tag")
     .required("Tag is required"),
 });
+ 
 
-// Тип значень форми
 type NoteFormValues = {
   title: string;
   content: string;
-  tag: "" | AllowedTag; // "" дозволяємо тільки для placeholder
+  tag: "" | AllowedTag; 
 };
 
 export default function NoteForm({ onClose }: NoteFormProps) {
@@ -48,11 +48,11 @@ export default function NoteForm({ onClose }: NoteFormProps) {
       initialValues={{ title: "", content: "", tag: "" }}
       validationSchema={NoteSchema}
       onSubmit={(values) => {
-        // Значення "" ніколи не дійде сюди через Yup
+        
         mutation.mutate({
           title: values.title,
           content: values.content,
-          tag: values.tag as AllowedTag, // безпечний каст
+          tag: values.tag as AllowedTag, 
         });
       }}
     >
