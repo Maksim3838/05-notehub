@@ -1,16 +1,36 @@
 import { useState, useEffect } from "react";
+import { useQuery, keepPreviousData as keepPrev } from "@tanstack/react-query";
 import NoteForm from "../NoteForm/NoteForm";
 import SearchBox from "../SearchBox/SearchBox";
 import Pagination from "../Pagination/Pagination";
 import NoteList from "../NoteList/NoteList";
 import type { Note } from "../../types/note";
 
+type NotesResponse = {
+  notes: Note[];
+  totalPages: number;
+};
+
+const fetchNotes = async (page: number, search: string): Promise<NotesResponse> => {
+  const res = await fetch(`/api/notes?page=${page}&search=${search}`);
+  if (!res.ok) throw new Error("Failed to fetch notes");
+  return res.json();
+};
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
-  const [notes, setNotes] = useState<Note[]>([]);
+  const debouncedSearch = useDebounce(searchQuery, 500);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -20,29 +40,26 @@ export default function App() {
     return () => document.removeEventListener("keydown", handleEsc);
   }, []);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-      setCurrentPage(1);
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [searchQuery]);
+  const { data, isLoading, error } = useQuery<NotesResponse, Error>({
+    queryKey: ["notes", currentPage, debouncedSearch],
+    queryFn: () => fetchNotes(currentPage, debouncedSearch),
+    placeholderData: keepPrev, 
+  });
 
-  useEffect(() => {
-    async function loadNotes() {
-      
-      console.log("Fetch notes for page:", currentPage, "search:", debouncedSearch);
-     
-      setNotes([]);
-    }
-    loadNotes();
-  }, [currentPage, debouncedSearch]);
+  const notes = data?.notes ?? [];
+  const totalPages = data?.totalPages ?? 1;
 
   return (
-    <div>
-      <SearchBox value={searchQuery} onChange={setSearchQuery} />
+    <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
+      <h1>My Notes App</h1>
 
-      <button onClick={() => setIsModalOpen(true)}>Create Note</button>
+      <SearchBox value={searchQuery} onChange={setSearchQuery} />
+      <button
+        style={{ marginTop: "10px" }}
+        onClick={() => setIsModalOpen(true)}
+      >
+        Create Note
+      </button>
 
       {isModalOpen && (
         <div
@@ -68,20 +85,25 @@ export default function App() {
               minWidth: "300px",
             }}
           >
-            <NoteForm
-              onClose={() => setIsModalOpen(false)}
-                          />
+            <NoteForm onClose={() => setIsModalOpen(false)} />
           </div>
         </div>
       )}
 
-      <NoteList notes={notes} />
+      {isLoading && <p>Loading notes...</p>}
+      {error && <p style={{ color: "red" }}>Error loading notes</p>}
 
-      <Pagination
-        currentPage={currentPage}
-        onPrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-        onNext={() => setCurrentPage((prev) => prev + 1)}
-      />
+      {!isLoading && notes.length > 0 && <NoteList notes={notes} />}
+      {!isLoading && notes.length === 0 && <p>No notes found</p>}
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          pageCount={totalPages}
+          onPrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          onNext={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+        />
+      )}
     </div>
   );
 }
