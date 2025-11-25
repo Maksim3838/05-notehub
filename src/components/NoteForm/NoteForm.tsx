@@ -6,8 +6,7 @@ import type { Note } from "../../types/note";
 
 interface NoteFormProps {
   onClose: () => void;
-  onSubmit: (note: { title: string; content?: string; tag?: string }) => void;
-}
+  }
 
 
 const allowedTags = ["Todo", "Work", "Personal", "Meeting", "Shopping"] as const;

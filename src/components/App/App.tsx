@@ -70,11 +70,7 @@ export default function App() {
           >
             <NoteForm
               onClose={() => setIsModalOpen(false)}
-              onSubmit={(note) => {
-                console.log("New note:", note);
-                setIsModalOpen(false);
-              }}
-            />
+                          />
           </div>
         </div>
       )}
