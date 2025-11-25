@@ -1,13 +1,20 @@
 import ReactPaginate from "react-paginate";
 
 interface PaginationProps {
-  currentPage: number;       
-  pageCount: number;         
-  onPrev: () => void;
-  onNext: () => void;
+  currentPage: number;
+  pageCount: number;
+  onPageChange: (selectedPage: number) => void;
+  onPrev?: () => void;
+  onNext?: () => void;
 }
 
-export default function Pagination({ currentPage, pageCount, onPrev, onNext }: PaginationProps) {
+export default function Pagination({
+  currentPage,
+  pageCount,
+  onPageChange,
+  onPrev,
+  onNext,
+}: PaginationProps) {
   return (
     <div style={{ marginTop: "20px" }}>
       <ReactPaginate
@@ -15,11 +22,12 @@ export default function Pagination({ currentPage, pageCount, onPrev, onNext }: P
         nextLabel={"Next"}
         pageCount={pageCount}
         onPageChange={(event) => {
-          const selected = event.selected + 1; 
-          if (selected < currentPage) onPrev();
-          if (selected > currentPage) onNext();
+          const selected = event.selected + 1;
+          if (selected < currentPage && onPrev) onPrev();
+          if (selected > currentPage && onNext) onNext();
+          onPageChange(selected);
         }}
-        forcePage={currentPage - 1} 
+        forcePage={currentPage - 1}
         marginPagesDisplayed={1}
         pageRangeDisplayed={2}
         containerClassName={"pagination"}

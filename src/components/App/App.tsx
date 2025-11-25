@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { useQuery, keepPreviousData as keepPrev } from "@tanstack/react-query";
+import { useState, useEffect, startTransition } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import NoteForm from "../NoteForm/NoteForm";
 import SearchBox from "../SearchBox/SearchBox";
 import Pagination from "../Pagination/Pagination";
@@ -30,9 +31,15 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+
   const debouncedSearch = useDebounce(searchQuery, 500);
 
+ 
   useEffect(() => {
+    startTransition(() => setCurrentPage(1));
+  }, [debouncedSearch]);
+
+    useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") setIsModalOpen(false);
     };
@@ -40,20 +47,21 @@ export default function App() {
     return () => document.removeEventListener("keydown", handleEsc);
   }, []);
 
-  const { data, isLoading, error } = useQuery<NotesResponse, Error>({
+    const { data, isLoading, error } = useQuery<NotesResponse, Error>({
     queryKey: ["notes", currentPage, debouncedSearch],
     queryFn: () => fetchNotes(currentPage, debouncedSearch),
-    placeholderData: keepPrev, 
+    placeholderData: { notes: [], totalPages: 1 }, 
   });
 
-  const notes = data?.notes ?? [];
-  const totalPages = data?.totalPages ?? 1;
+  const notes: Note[] = data?.notes ?? [];
+  const totalPages: number = data?.totalPages ?? 1;
 
   return (
     <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
       <h1>My Notes App</h1>
 
       <SearchBox value={searchQuery} onChange={setSearchQuery} />
+
       <button
         style={{ marginTop: "10px" }}
         onClick={() => setIsModalOpen(true)}
@@ -91,7 +99,7 @@ export default function App() {
       )}
 
       {isLoading && <p>Loading notes...</p>}
-      {error && <p style={{ color: "red" }}>Error loading notes</p>}
+      {error && <p style={{ color: "red" }}>Error loading notes: {error.message}</p>}
 
       {!isLoading && notes.length > 0 && <NoteList notes={notes} />}
       {!isLoading && notes.length === 0 && <p>No notes found</p>}
@@ -100,8 +108,7 @@ export default function App() {
         <Pagination
           currentPage={currentPage}
           pageCount={totalPages}
-          onPrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          onNext={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          onPageChange={(page) => setCurrentPage(page)}
         />
       )}
     </div>
