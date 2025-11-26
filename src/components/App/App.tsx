@@ -5,6 +5,7 @@ import NoteForm from "../NoteForm/NoteForm";
 import SearchBox from "../SearchBox/SearchBox";
 import Pagination from "../Pagination/Pagination";
 import NoteList from "../NoteList/NoteList";
+import Modal from "../Modal/Modal";
 import type { Note } from "../../types/note";
 
 type NotesResponse = {
@@ -34,12 +35,12 @@ export default function App() {
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
- 
-  useEffect(() => {
+    useEffect(() => {
     startTransition(() => setCurrentPage(1));
   }, [debouncedSearch]);
 
-    useEffect(() => {
+  
+  useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") setIsModalOpen(false);
     };
@@ -47,15 +48,14 @@ export default function App() {
     return () => document.removeEventListener("keydown", handleEsc);
   }, []);
 
-    const { data, isLoading, error } = useQuery<NotesResponse, Error>({
-  queryKey: ["notes", currentPage, debouncedSearch],
-  queryFn: () => fetchNotes(currentPage, debouncedSearch),
-  placeholderData: (prevData) => prevData ?? { notes: [], totalPages: 1 },
-});
+  const { data, isLoading, error } = useQuery<NotesResponse, Error>({
+    queryKey: ["notes", currentPage, debouncedSearch],
+    queryFn: () => fetchNotes(currentPage, debouncedSearch),
+    placeholderData: (prev) => prev,
+  });
 
-
-  const notes: Note[] = data?.notes ?? [];
-  const totalPages: number = data?.totalPages ?? 1;
+  const notes = data?.notes ?? [];
+  const totalPages = data?.totalPages ?? 1;
 
   return (
     <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
@@ -63,41 +63,14 @@ export default function App() {
 
       <SearchBox value={searchQuery} onChange={setSearchQuery} />
 
-      <button
-        style={{ marginTop: "10px" }}
-        onClick={() => setIsModalOpen(true)}
-      >
+      <button style={{ marginTop: "10px" }} onClick={() => setIsModalOpen(true)}>
         Create Note
       </button>
 
-      {isModalOpen && (
-        <div
-          onClick={() => setIsModalOpen(false)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: "white",
-              padding: "20px",
-              borderRadius: "8px",
-              minWidth: "300px",
-            }}
-          >
-            <NoteForm onClose={() => setIsModalOpen(false)} />
-          </div>
-        </div>
-      )}
+      
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <NoteForm onClose={() => setIsModalOpen(false)} />
+      </Modal>
 
       {isLoading && <p>Loading notes...</p>}
       {error && <p style={{ color: "red" }}>Error loading notes: {error.message}</p>}

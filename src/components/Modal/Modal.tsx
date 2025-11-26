@@ -1,66 +1,41 @@
-import React, { useEffect } from "react";
-import { createPortal } from "react-dom";
+import type { ReactNode } from "react";
 
 interface ModalProps {
+  isOpen: boolean;
   onClose: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-const modalRoot = document.getElementById("modal-root")!; 
+export default function Modal({ isOpen, onClose, children }: ModalProps) {
+  if (!isOpen) return null;
 
-export default function Modal({ onClose, children }: ModalProps) {
-  
-  useEffect(() => {
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
-  }, []);
-
-    useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
-  const modalContent = (
+  return (
     <div
-      onClick={onClose} 
+      onClick={onClose}
       style={{
         position: "fixed",
         top: 0,
         left: 0,
-        right: 0,
-        bottom: 0,
+        width: "100%",
+        height: "100%",
         background: "rgba(0,0,0,0.5)",
         display: "flex",
-        alignItems: "center",
         justifyContent: "center",
-        zIndex: 1000,
+        alignItems: "center",
+        zIndex: 999,
       }}
     >
       <div
-        onClick={(e) => e.stopPropagation()} 
+        onClick={(e) => e.stopPropagation()}
         style={{
           background: "white",
-          padding: 20,
-          width: 400,
-          borderRadius: 8,
-          maxHeight: "80vh",
-          overflowY: "auto",
+          padding: "20px",
+          borderRadius: "8px",
+          minWidth: "300px",
         }}
       >
         {children}
-        <button onClick={onClose} style={{ marginTop: 10 }}>
-          Close
-        </button>
       </div>
     </div>
   );
-
-  return createPortal(modalContent, modalRoot);
 }
-
