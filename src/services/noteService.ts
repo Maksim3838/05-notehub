@@ -22,8 +22,8 @@ const api = axios.create({
 });
 
 export const fetchNotes = async (
-  page = "",
-  search = 1
+  page = 1,
+  search = ""
 ): Promise<NotesResponse> => {
   const res = await api.get<NotesResponse>(`/notes`, {
     params: {page, search, },
