@@ -1,6 +1,7 @@
 import type { Note } from "../../types/note";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteNote } from "../../services/noteService"; 
+import css from "./NoteList.module.css"
 
 interface NoteListProps {
   notes: Note[];
@@ -19,41 +20,19 @@ export default function NoteList({ notes }: NoteListProps) {
   if (!notes.length) return <p>No notes found</p>;
 
   return (
-    <ul>
-      {notes.map((note) => (
-        <li key={note.id} style={{ marginBottom: "8px" }}>
-          <strong>{note.title}</strong>
 
-          <span
-            style={{
-              marginLeft: "8px",
-              padding: "2px 6px",
-              background: "#eee",
-              borderRadius: "4px",
-              fontSize: "0.85em",
-            }}
-          >
-            {note.tag}
-          </span>
+    <ul className={css.list}>
+	{notes.map(note=><li className={css.listItem}>
+    <h2 className={css.title}>{note.title}</h2>
+    <p className={css.content}>{note.content}</p>
+    <div className={css.footer}>
+      <span className={css.tag}>{note.tag}</span>
+      <button className={css.button}>Delete</button>
+    </div>
+  </li>)}
+  </ul>
+   )
+  }
 
-          {note.content ? `: ${note.content}` : <em> (no content)</em>}
 
-          <button
-            onClick={() => deleteMutation.mutate(note.id)}
-            style={{
-              marginLeft: "12px",
-              padding: "2px 8px",
-              background: "red",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            Delete
-          </button>
-        </li>
-      ))}
-    </ul>
-  );
-}
+  
