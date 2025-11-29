@@ -32,14 +32,15 @@ type NoteFormValues = {
   tag: "" | AllowedTag; 
 };
 
-export default function NoteForm({ onClose }: NoteFormProps) {
+export default function NoteForm({ onSuccess, onClose }: NoteFormProps) {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  const  mutation = useMutation({
     mutationFn: (note: Omit<Note, "id" | "createdAt" | "updatedAt">) =>
       createNote(note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+       if (onSuccess) onSuccess(); 
       onClose();
     },
   });
@@ -91,7 +92,7 @@ export default function NoteForm({ onClose }: NoteFormProps) {
           </div>
 
           <button type="submit" disabled={mutation.isPending || isSubmitting}>
-            {mutation.isPending ? "Saving..." : "Save"}
+            {mutation.isPending ? "Saving..." : "Create note"}
           </button>
           <button type="button" onClick={onClose}>
             Cancel
