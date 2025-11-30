@@ -15,7 +15,8 @@ const allowedTags = ["Todo", "Work", "Personal", "Meeting", "Shopping"] as const
 type AllowedTag = (typeof allowedTags)[number];
 
 const NoteSchema = Yup.object().shape({
-  title: Yup.string().trim().required("Title is required"),
+  title: Yup.string().trim().min(3, "Title must be at least 3 characters")
+    .max(50, "Title must be at most 50 characters").required("Title is required"),
   content: Yup.string()
     .trim()
     .max(500, "Content must be at most 500 characters")
@@ -32,7 +33,7 @@ type NoteFormValues = {
   tag: "" | AllowedTag; 
 };
 
-export default function NoteForm({ onSuccess, onClose }: NoteFormProps) {
+export default function NoteForm({ onSuccess, onCancel }: NoteFormProps) {
   const queryClient = useQueryClient();
 
   const  mutation = useMutation({
@@ -41,7 +42,7 @@ export default function NoteForm({ onSuccess, onClose }: NoteFormProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
        if (onSuccess) onSuccess(); 
-      onClose();
+      onCancel();
     },
   });
 
@@ -94,7 +95,7 @@ export default function NoteForm({ onSuccess, onClose }: NoteFormProps) {
           <button type="submit" disabled={mutation.isPending || isSubmitting}>
             {mutation.isPending ? "Saving..." : "Create note"}
           </button>
-          <button type="button" onClick={onClose}>
+          <button type="button" onClick={onCancel}>
             Cancel
           </button>
         </Form>
