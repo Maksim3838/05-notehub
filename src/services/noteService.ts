@@ -39,10 +39,10 @@ export const createNote = async (
   return res.data;
 };
 
-export const updateNote = async (note: Note): Promise<Note> => {
-  const res = await api.put<Note>(`/notes/${note.id}`, note);
-  return res.data;
-};
+// export const updateNote = async (note: Note): Promise<Note> => {
+//   const res = await api.put<Note>(`/notes/${note.id}`, note);
+//   return res.data;
+// };
 
 export const deleteNote = async (id: string): Promise<Note> => {
   const res = await api.delete<Note>(`/notes/${id}`);
