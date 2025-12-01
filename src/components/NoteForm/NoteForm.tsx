@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNote } from "../../services/noteService";
 import type { Note } from "../../types/note";
-import css from "../NoteForm/NoteForm.module.css"
+import css from "./NoteForm.module.css"
 
 interface NoteFormProps {
    onSuccess?: () => void;
@@ -61,7 +61,7 @@ export default function NoteForm({ onSuccess, onCancel }: NoteFormProps) {
     >
       {({ isSubmitting }) => (
         <Form className={css.form}>
-    <div className={css.formGroup}>
+  <div className={css.formGroup}>
     <label htmlFor="title">Title</label>
     <Field
       type="text"
@@ -73,7 +73,7 @@ export default function NoteForm({ onSuccess, onCancel }: NoteFormProps) {
     <ErrorMessage name="title" component="div" className={css.error} />
   </div>
 
-    <div className={css.formGroup}>
+  <div className={css.formGroup}>
     <label htmlFor="content">Content</label>
     <Field
       as="textarea"
@@ -86,7 +86,7 @@ export default function NoteForm({ onSuccess, onCancel }: NoteFormProps) {
     <ErrorMessage name="content" component="div" className={css.error} />
   </div>
 
-    <div className={css.formGroup}>
+  <div className={css.formGroup}>
     <label htmlFor="tag">Tag</label>
     <Field
       as="select"
@@ -104,7 +104,7 @@ export default function NoteForm({ onSuccess, onCancel }: NoteFormProps) {
     <ErrorMessage name="tag" component="div" className={css.error} />
   </div>
 
-    <div className={css.actions}>
+  <div className={css.actions}>
     <button
       type="submit"
       disabled={mutation.isPending || isSubmitting}
