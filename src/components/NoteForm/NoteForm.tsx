@@ -5,8 +5,7 @@ import { createNote } from "../../services/noteService";
 import type { Note } from "../../types/note";
 
 interface NoteFormProps {
-  onClose: () => void;
-   onSuccess: () => void;
+   onSuccess?: () => void;
   onCancel: () => void;
   }
 
