@@ -3,6 +3,7 @@ import * as Yup from "yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNote } from "../../services/noteService";
 import type { Note } from "../../types/note";
+import css from "../NoteForm/NoteForm.module.css"
 
 interface NoteFormProps {
    onSuccess?: () => void;
@@ -59,45 +60,68 @@ export default function NoteForm({ onSuccess, onCancel }: NoteFormProps) {
       }}
     >
       {({ isSubmitting }) => (
-        <Form>
-          <label>
-            Title:
-            <Field type="text" name="title" placeholder="Note title" />
-          </label>
-          <div style={{ color: "red", fontSize: "0.9rem" }}>
-            <ErrorMessage name="title" />
-          </div>
+        <Form className={css.form}>
+    <div className={css.formGroup}>
+    <label htmlFor="title">Title</label>
+    <Field
+      type="text"
+      id="title"
+      name="title"
+      placeholder="Note title"
+      className={css.input}
+    />
+    <ErrorMessage name="title" component="div" className={css.error} />
+  </div>
 
-          <label>
-            Content:
-            <Field as="textarea" name="content" placeholder="Note content..." rows={4} />
-          </label>
-          <div style={{ color: "red", fontSize: "0.9rem" }}>
-            <ErrorMessage name="content" />
-          </div>
+    <div className={css.formGroup}>
+    <label htmlFor="content">Content</label>
+    <Field
+      as="textarea"
+      id="content"
+      name="content"
+      placeholder="Note content..."
+      rows={4}
+      className={css.textarea}
+    />
+    <ErrorMessage name="content" component="div" className={css.error} />
+  </div>
 
-          <label>
-            Tag:
-            <Field as="select" name="tag">
-              <option value="">Select tag</option>
-              {allowedTags.map((tag) => (
-                <option key={tag} value={tag}>
-                  {tag}
-                </option>
-              ))}
-            </Field>
-          </label>
-          <div style={{ color: "red", fontSize: "0.9rem" }}>
-            <ErrorMessage name="tag" />
-          </div>
+    <div className={css.formGroup}>
+    <label htmlFor="tag">Tag</label>
+    <Field
+      as="select"
+      id="tag"
+      name="tag"
+      className={css.select}
+    >
+      <option value="">Select tag</option>
+      {allowedTags.map((tag) => (
+        <option key={tag} value={tag}>
+          {tag}
+        </option>
+      ))}
+    </Field>
+    <ErrorMessage name="tag" component="div" className={css.error} />
+  </div>
 
-          <button type="submit" disabled={mutation.isPending || isSubmitting}>
-            {mutation.isPending ? "Saving..." : "Create note"}
-          </button>
-          <button type="button" onClick={onCancel}>
-            Cancel
-          </button>
-        </Form>
+    <div className={css.actions}>
+    <button
+      type="submit"
+      disabled={mutation.isPending || isSubmitting}
+      className={css.submitButton}
+    >
+      {mutation.isPending ? "Saving..." : "Create note"}
+    </button>
+
+    <button
+      type="button"
+      onClick={onCancel}
+      className={css.cancelButton}
+    >
+      Cancel
+    </button>
+  </div>
+</Form>
       )}
     </Formik>
   );
