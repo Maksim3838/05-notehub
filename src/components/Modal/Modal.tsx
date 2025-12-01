@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import css from "../Modal/Modal.module.css"
 
 interface ModalProps {
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
   children: ReactNode;
 }

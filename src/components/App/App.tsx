@@ -57,9 +57,10 @@ export default function App() {
       <NoteList notes={notes} />
       {isLoading && <p>Loading...</p>}
       {isModalOpen && (
-        <Modal isOpen={isModalOpen} onClose={closeModal}>
-    <NoteForm onSuccess={closeModal} onCancel={closeModal} onClose={closeModal} />
-  </Modal>
+        
+ <Modal onClose={closeModal}>
+          <NoteForm onSuccess={closeModal} onCancel={closeModal} />
+        </Modal>
       )}
     </div>
   );
