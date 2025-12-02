@@ -50,19 +50,18 @@ export default function App() {
             onPageChange={setCurrentPage}
           />
         )}
-        <button className={css.button} onClick={openModal}>
+         <button className={css.button} onClick={openModal}>
           Create note +
         </button>
       </header>
       <NoteList notes={notes} />
       {isLoading && <p>Loading...</p>}
       {isModalOpen && (
-        
- <Modal onClose={closeModal}>
+        <Modal onClose={closeModal}>
           <NoteForm onSuccess={closeModal} onCancel={closeModal} />
         </Modal>
       )}
     </div>
   );
-}  
+} 
 
