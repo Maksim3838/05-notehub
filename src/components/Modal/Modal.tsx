@@ -10,8 +10,7 @@ interface ModalProps {
 }
 
 export default function Modal({ isOpen, onClose, children }: ModalProps) {
-    const modalRoot =
-    document.getElementById("modal-root") ??
+    const modalRoot =document.getElementById("modal-root") ??
     (() => {
       const root = document.createElement("div");
       root.id = "modal-root";
