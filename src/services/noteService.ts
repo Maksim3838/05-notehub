@@ -14,7 +14,8 @@ export interface NotesResponse {
 }
 
 const api = axios.create({
-  baseURL: "https://notehub-public.goit.study/api",
+  baseURL: "https://notehub-public.goit.study/api/docs",
+
   headers: {
     Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
     "Content-Type": "application/json",
