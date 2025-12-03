@@ -38,7 +38,7 @@ export default function App() {
     setIsModalOpen(false);
   };
 
-  return (
+ return (
     <div className={css.app}>
       <header className={css.toolbar}>
         <SearchBox value={searchQuery} onSearch={debouncedSearchQuery} />
@@ -57,10 +57,35 @@ export default function App() {
       <NoteList notes={notes} />
       {isLoading && <p>Loading...</p>}
       {isModalOpen && (
-        
- <Modal onClose={closeModal}>
+        <Modal onClose={closeModal}>
           <NoteForm onSuccess={closeModal} onCancel={closeModal} />
         </Modal>
+
+
+
+//   return (
+//     <div className={css.app}>
+//       <header className={css.toolbar}>
+//         <SearchBox value={searchQuery} onSearch={debouncedSearchQuery} />
+//         <Toaster position="top-center" />
+//         {isSuccess && totalPages > 1 && (
+//           <Pagination
+//             totalPages={totalPages}
+//             currentPage={currentPage}
+//             onPageChange={setCurrentPage}
+//           />
+//         )}
+//         <button className={css.button} onClick={openModal}>
+//           Create note +
+//         </button>
+//       </header>
+//       <NoteList notes={notes} />
+//       {isLoading && <p>Loading...</p>}
+//       {isModalOpen && (
+        
+//  <Modal onClose={closeModal}>
+//           <NoteForm onSuccess={closeModal} onCancel={closeModal} />
+//         </Modal>
       )}
     </div>
   );
