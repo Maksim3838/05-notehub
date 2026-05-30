@@ -1,12 +1,7 @@
 import axios from "axios";
 import type { Note } from "../types/note";
 
-export type AllowedTag =
-  | "Todo"
-  | "Work"
-  | "Personal"
-  | "Meeting"
-  | "Shopping";
+
 
 export interface NotesResponse {
   notes: Note[];
